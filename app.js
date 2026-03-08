@@ -3,9 +3,9 @@ const generateBtn = document.getElementById("generate");
 const goalsContainer = document.getElementById("goals-container");
 
 generateBtn.addEventListener("click", function() {
-    const goal = goalInput.nodeValue.trim();
+    const goal = goalInput.value.trim();
     if (!goal) return;
-    goalInput.nodeValue = "";
+    goalInput.value = "";
 
     const goalBtn = document.createElement("button");
     goalBtn.textContent = goal;
