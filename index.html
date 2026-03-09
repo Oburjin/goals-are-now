@@ -6,14 +6,19 @@
     </head>
     <body>
         <h1>Goal Tracker</h1>
-        <label for="goal">Enter your big goal:</label>
-        <input type="text" id="goal">
-        <button id="generate">Add Goal</button>
 
-        <!-- <label for="hoursPerDay">How many hours can you work a day?</label> -->
-        <input id="hoursPerDay" type="number" placeholder="Hours per day">
+        <div>
+            <label for="goal">Enter your big goal:</label>
+            <input id="goalInput" type="text" placeholder="Enter your goal">
+            <button id="addGoalBtn">Add Goal</button>
+        </div>
 
-        <div id="goals-container"></div>
+        <div>
+            <label for="hoursPerDay">How many hours can you work a day?</label>
+            <input id="hoursPerDay" type="number" placeholder="Hours per day" value="4">
+        </div>
+
+        <div id="scheduleContainer"></div>
 
         <script src="app.js"></script>
     </body>

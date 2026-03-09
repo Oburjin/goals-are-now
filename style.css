@@ -28,3 +28,43 @@ input {
 li {
     margin-bottom: 5px;
 }
+
+/* Container for each goal */
+.goal-container {
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+/* Collapsible button */
+.goal-button {
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+/* Change button color on hover */
+.goal-button:hover {
+  background-color: #005a9e;
+}
+
+/* Task list (hidden by default) */
+.task-list {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+/* Individual task item */
+.task-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
