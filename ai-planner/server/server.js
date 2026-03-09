@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors"
 import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { scheduleTasks } from "./scheduler.js";
@@ -11,6 +12,9 @@ const model = genAI.getGenerativeModel({
 });
 
 const app = express();
+app.use(cors(
+    // {origin: "http://oburjin.github.io"}
+));
 
 app.use(express.json());
 
