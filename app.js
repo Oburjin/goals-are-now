@@ -49,7 +49,7 @@ addGoalBtn.addEventListener("click", async () => {
     });
 
     try {
-        const res = await fetch ("http://localhost:3000/plan-goals", {
+        const res = await fetch ("http://localhost:3000/plan-goal", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({ goal, hoursPerDay })
