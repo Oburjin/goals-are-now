@@ -1,12 +1,12 @@
-# Goals-Are-Now – AI-Powered Goal Planner
+# Goals Are Now – AI Powered Goal Planner
 
-**Goals-Are-Now** is a small full‑stack application that takes a user’s high‑level goal and automatically builds a day‑by‑day learning plan. It uses a generative AI model for task decomposition, schedules the resulting tasks based on your available hours, and lets you track progress with a simple checkbox UI.
+**Goals Are Now** is a small full‑stack application that takes a user’s high‑level goal and automatically builds a day‑by‑day learning plan. It uses a generative AI model for task decomposition, schedules the resulting tasks based on your available hours, and lets you track progress with a simple checkbox UI.
 
 The current prototype integrates the **Google Gemini API** for content generation and stores state client‑side via `localStorage`. A lightweight Express server handles AI requests and scheduling logic.
 
 ---
 
-## Key Features ✅
+## Key Features & Usage ✅
 
 * Ask the system to plan any goal (e.g. “Learn React” or “Write a novel”).
 * AI breaks the goal into 8‑12 bite‑sized tasks, returning JSON only.
