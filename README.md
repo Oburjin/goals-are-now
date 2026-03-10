@@ -59,7 +59,7 @@ GitHub pages link: https://oburjin.github.io/goals-are-now/
 
    ```bash
    npm init -y \
-   npm install express dotenv @google/generative-ai
+   npm install cors express dotenv @google/generative-ai
    ```
 
 3. **Create `.env`** in the server folder:
@@ -68,13 +68,25 @@ GitHub pages link: https://oburjin.github.io/goals-are-now/
    GEMINI_API_KEY=your_api_key_here
    ```
 
-4. **Run the server**
+4. **Edit** the `package.json` file so that it uses ES modules. Change:
+
+    ```json
+    "type": "commonjs",
+    ```
+
+    to:
+
+    ```json
+    "type": "module",
+    ```
+
+5. **Run the server**
 
    ```bash
    node server.js
    ```
 
-5. **Open the frontend** by loading `ai-planner/client/index.html` in a browser (e.g. using live server)
+6. **Open the frontend** by loading `ai-planner/client/index.html` in a browser (e.g. using live server)
 
 ---
 
