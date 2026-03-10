@@ -1,98 +1,101 @@
 import express from "express";
-import cors from "cors"
+import cors from "cors";
 import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { scheduleTasks } from "./scheduler.js";
 
 dotenv.config();
 
+// Constants
+const PORT = 3000;
+const DEFAULT_HOURS_PER_DAY = 4;
+const AI_MODEL = "gemma-3-1b-it"; // Change as needed
+const TASK_PROMPT = `
+Break the following goal into 8-12 small learning tasks.
+
+Return ONLY valid JSON.
+
+Do not include explanations.
+Do not include markdown.
+Do not include backticks.
+
+The JSON must follow this format exactly:
+
+{
+"tasks":[
+{"task":"task name","hours":number}
+]
+}
+
+Goal: {goal}
+`;
+
+// Initialize AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({
-    // model: "gemini-2.5-flash"
-    model: "gemma-3-1b-it"
-    // model: "gemma-3-12b-it"
-});
+const model = genAI.getGenerativeModel({ model: AI_MODEL });
 
 const app = express();
-app.use(cors(
-    // {origin: "http://oburjin.github.io"}
-));
-
+app.use(cors());
 app.use(express.json());
 
-app.get("/test-ai", async (req, res) => {
-    const result = await model.generateContent("Say hello");
-    const response = await result.response;
-    res.send(response.text());
-});
-
-app.post("/plan-goal", async function (req, res) {
-    const goal = req.body.goal;
-
-    const prompt = `
-        Break the following goal into 8-12 small learning tasks.
-
-        Return ONLY valid JSON.
-
-        Do not include explanations.
-        Do not include markdown.
-        Do not include backticks.
-
-        The JSON must follow this format exactly:
-
-        {
-        "tasks":[
-        {"task":"task name","hours":number}
-        ]
-        }
-
-        Goal: ${goal}
-        `;
-
+/**
+ * Generates tasks using AI for a given goal.
+ * @param {string} goal - The goal to break into tasks.
+ * @returns {Object} Parsed plan with tasks.
+ */
+async function generateTasks(goal) {
+    const prompt = TASK_PROMPT.replace("{goal}", goal);
     const result = await model.generateContent(prompt);
-
     let text = result.response.text();
 
-    console.log(text);
+    console.log("AI Response:", text);
 
     let cleanText = text
-    .replace(/```json/g, "")   // remove markdown opening
-    .replace(/```/g, "")       // remove markdown closing
-    .replace(/\r/g, "")        // remove carriage returns
-    .replace(/\t/g, " ")       // replace tabs with spaces
-    .replace(/[\u0000-\u001F]+/g, "") // remove control chars
-    .trim();
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .replace(/\r/g, "")
+        .replace(/\t/g, " ")
+        .replace(/[\u0000-\u001F]+/g, "")
+        .trim();
 
-    let plan;
     try {
-        plan = JSON.parse(cleanText);
+        const plan = JSON.parse(cleanText);
+        if (!plan.tasks || plan.tasks.length === 0) {
+            throw new Error("AI returned no tasks");
+        }
+        return plan;
     } catch (error) {
         console.error("Error parsing JSON:", cleanText);
-        return res.status(400).json({ error: "Invalid JSON response from AI" });
+        throw new Error("Invalid JSON response from AI");
     }
+}
 
-    if (!plan.tasks || plan.tasks.length === 0) {
-        throw new Error("AI returned no tasks");
+app.post("/plan-goal", async (req, res) => {
+    try {
+        const { goal, hoursPerDay = DEFAULT_HOURS_PER_DAY } = req.body;
+
+        if (!goal || typeof goal !== "string" || goal.trim().length === 0) {
+            return res.status(400).json({ error: "Valid goal is required" });
+        }
+
+        const plan = await generateTasks(goal.trim());
+        const schedule = scheduleTasks(plan.tasks, hoursPerDay);
+
+        res.json({ tasks: plan.tasks, schedule });
+    } catch (error) {
+        console.error("Plan goal error:", error);
+        res.status(500).json({ error: error.message || "Failed to generate plan" });
     }
-    const hoursPerDay = req.body.hoursPerDay || 4;  // Default 4h/day
-    const schedule = scheduleTasks(plan.tasks, hoursPerDay);
-    res.json({
-        tasks: plan.tasks,
-        schedule
-    });
 });
 
-app.post("/test-goal", function(req, res) {
-    const goal = req.body.goal;
-
-    res.json({
-        message: "Goal received",
-        goal: goal
-    });
+app.post("/test-goal", (req, res) => {
+    const { goal } = req.body;
+    if (!goal) {
+        return res.status(400).json({ error: "Goal is required" });
+    }
+    res.json({ message: "Goal received", goal });
 });
 
-// app.get("/", function(req, res) {
-//     res.send("Server working!");
-// });
-
-app.listen(3000);
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
