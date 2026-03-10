@@ -72,3 +72,38 @@ li {
   align-items: center;
   margin-bottom: 5px;
 }
+
+.progress-container {
+  width: 100%;
+  background: #eee;
+  border-radius: 6px;
+  margin: 6px 0 10px 0;
+  height: 10px;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #4CAF50;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+/* Clear Button fixed in the top-right corner */
+#clearGoalsBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Hover effect */
+#clearGoalsBtn:hover {
+  background-color: #0056b3;
+}

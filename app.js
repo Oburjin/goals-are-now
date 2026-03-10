@@ -1,3 +1,4 @@
+const clearGoalsBtn = document.getElementById("clearGoalsBtn");
 const addGoalBtn = document.getElementById("addGoalBtn");
 const goalInput = document.getElementById("goalInput");
 const hoursInput = document.getElementById("hoursPerDay");
@@ -19,6 +20,18 @@ function animateThinking(element) {
   }, 500);
 
   return interval;
+}
+
+// Progress bar
+function updateProgress(goalObj, progressBar) {
+
+  const total = goalObj.tasks.length;
+  const completed = goalObj.tasks.filter(t => t.done).length;
+
+  const percent = (completed / total) * 100;
+
+  progressBar.style.width = percent + "%";
+
 }
 
 function saveGoals(goals) {
@@ -49,13 +62,22 @@ addGoalBtn.addEventListener("click", async () => {
 
     // Create a new container for this goal
     const goalDiv = document.createElement("div");
-    goalDiv.classList.add("goal-container");
+    goalDiv.classList.add("goal-container");    
 
     // Create collapsible button
     const button = document.createElement("button");
     button.textContent = goal;
     button.classList.add("goal-button");
     goalDiv.appendChild(button);
+
+    const progressBarContainer = document.createElement("div");
+    progressBarContainer.classList.add("progress-container");
+
+    const progressBar = document.createElement("div");
+    progressBar.classList.add("progress-bar");
+
+    progressBarContainer.appendChild(progressBar);
+    goalDiv.appendChild(progressBarContainer);
 
     // Create "generating" text as visual feedback for awaiting tasks from AI
     const feedbackSpan = document.createElement("span");
@@ -91,13 +113,24 @@ addGoalBtn.addEventListener("click", async () => {
     });
 
     try {
-        const res = await fetch ("http://localhost:3000/plan-goal", {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+        const res = await fetch("http://localhost:3000/plan-goal", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ goal, hoursPerDay })
+            body: JSON.stringify({ goal, hoursPerDay }),
+            signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
+
         const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || `Server error: ${res.status}`);
+        }
+
         clearInterval(thinkingAnimation);
 
         const newGoal = {
@@ -109,6 +142,8 @@ addGoalBtn.addEventListener("click", async () => {
         };
         goalsData.push(newGoal);
         saveGoals(goalsData);
+
+        const goalObj = newGoal;
 
         feedbackSpan.textContent = "";
 
@@ -127,6 +162,7 @@ addGoalBtn.addEventListener("click", async () => {
                     if (taskObj) {
                         taskObj.done = checkbox.checked;
                         saveGoals(goalsData);
+                        updateProgress(goalObj, progressBar);
                     }
                 }   
             });
@@ -139,11 +175,13 @@ addGoalBtn.addEventListener("click", async () => {
             div.appendChild(label);
 
             listDiv.appendChild(div);
+
+            updateProgress(newGoal, progressBar);
         });
     } catch (err) {
         console.error(err);
         clearInterval(thinkingAnimation);
-        feedbackSpan.textContent = "Error generating tasks.";
+        feedbackSpan.textContent = err.message || "Error generating tasks.";
     }
 });
 
@@ -161,6 +199,15 @@ function renderSavedGoals() {
     button.classList.add("goal-button");
 
     goalDiv.appendChild(button);
+
+    const progressBarContainer = document.createElement("div");
+    progressBarContainer.classList.add("progress-container");
+
+    const progressBar = document.createElement("div");
+    progressBar.classList.add("progress-bar");
+
+    progressBarContainer.appendChild(progressBar);
+    goalDiv.appendChild(progressBarContainer);
 
     const listDiv = document.createElement("div");
     listDiv.classList.add("task-list");
@@ -189,6 +236,7 @@ function renderSavedGoals() {
         checkbox.addEventListener("change", () => {
 
         const goalObj = goalsData.find(g => g.goal === goal);
+            if (!goalObj) return;
             const taskObj = goalObj.tasks.find(t =>
                 t.day === item.day && t.task === item.task
             );
@@ -196,6 +244,7 @@ function renderSavedGoals() {
             taskObj.done = checkbox.checked;
 
             saveGoals(goalsData);
+            updateProgress(goalObj, progressBar);
         });
 
         const label = document.createElement("label");
@@ -209,6 +258,7 @@ function renderSavedGoals() {
 
         listDiv.appendChild(div);
 
+        updateProgress(goalObj, progressBar);
     });
 
     goalDiv.appendChild(listDiv);
@@ -219,3 +269,18 @@ function renderSavedGoals() {
 }
 
 renderSavedGoals();
+
+// Clear button
+clearGoalsBtn.addEventListener("click", () => {
+
+  const confirmClear = confirm("Are you sure you want to delete all goals?");
+
+  if (!confirmClear) return;
+
+  goalsData = [];
+
+  localStorage.removeItem("goals");
+
+  scheduleContainer.innerHTML = "";
+
+});
