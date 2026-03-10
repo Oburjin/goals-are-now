@@ -4,6 +4,9 @@
 
 The current prototype integrates the **Google Gemini API** for content generation and stores state client‑side via `localStorage`. A lightweight Express server handles AI requests and scheduling logic.
 
+GitHub pages link: https://oburjin.github.io/goals-are-now/
+* Note that node server.js must be running for back end to function. See below in "Installation & Local Development" to run it locally.
+
 ---
 
 ## Key Features & Usage ✅
@@ -55,7 +58,8 @@ The current prototype integrates the **Google Gemini API** for content generatio
 2. **Install server dependencies**
 
    ```bash
-   npm install
+   npm init -y \
+   npm install express dotenv @google/generative-ai
    ```
 
 3. **Create `.env`** in the server folder:
